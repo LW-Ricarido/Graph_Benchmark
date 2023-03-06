@@ -33,6 +33,7 @@ class NodeClassifierRunner():
             self.device = torch.device('cpu')
         self.args['device'] = self.device
         self.args['net_params']['device'] = self.device
+        self.args['dataset']['device'] = self.device
     
     def _load_data(self):
         self.dataset = DatasetFactory.create_dataset(self.args['dataset']['name'], self.args['dataset'])
@@ -40,7 +41,7 @@ class NodeClassifierRunner():
         self.args['net_params']['n_classes'] = self.dataset.num_classes
 
     def _build_model(self):
-        self.model = ModelFactory.create_model(self.args['model'], self.args['net_params'])
+        self.model = ModelFactory.create_model(self.args['model'], self.args['net_params']).to(self.device)
         total_param = 0
         for param in self.model.parameters():
             total_param += np.prod((list(param.data.size())))

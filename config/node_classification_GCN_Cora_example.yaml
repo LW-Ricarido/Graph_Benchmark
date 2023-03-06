@@ -2,6 +2,7 @@ task_level: "node"
 model: "GCN"
 dataset: 
   name: "Cora"
+  self_loop: True # when self_loop is True, the graph will be forced to remove redundant edges
 test_rounds: 5
 save_path: "logs"
 log_interval: 50

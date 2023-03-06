@@ -23,8 +23,6 @@ class DatasetFactory(metaclass=ABCMeta):
         """Create a dataset"""
         if name not in cls.registry:
             raise ValueError('Cannot find dataset factory ({})'.format(name))
-        print('==========fucking name', name)
-        print(dataset_config)
         return cls.registry[name](**dataset_config)
 
 class BaseDataset(torch.utils.data.Dataset, metaclass=ABCMeta):
