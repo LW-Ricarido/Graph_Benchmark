@@ -1,9 +1,11 @@
 import numpy as np
 import os
 import time
+import random
 
 import torch
 import torch.optim as optim
+import dgl
 
 from tensorboardX import SummaryWriter
 from tqdm import tqdm
@@ -14,14 +16,18 @@ from data import DatasetFactory
 from model import ModelFactory
 from evaluator import EvaluatorFactory
 from loss import LossFactory
+from preprocessor import PreprocessorFactory
 import logging
+
 @RunnerFactory.register('NodeClassification')
 class NodeClassifierRunner():
 
     def __init__(self, **kwargs) -> None:
         self.args = kwargs
         self._set_device()
+        self._set_reproducibility()
         self._load_data()
+        self._build_preprocessor()
         self._build_model()
         self._build_evaluator()
         self._set_loss_fn()
@@ -35,10 +41,24 @@ class NodeClassifierRunner():
         self.args['net_params']['device'] = self.device
         self.args['dataset']['device'] = self.device
     
+    def _set_reproducibility(self):
+        if self.args['reproducibility']:
+            random.seed(self.args['seed'])
+            np.random.seed(self.args['seed'])
+            torch.manual_seed(self.args['seed'])
+            torch.cuda.manual_seed(self.args['seed'])
+
     def _load_data(self):
         self.dataset = DatasetFactory.create_dataset(self.args['dataset']['name'], self.args['dataset'])
         self.args['net_params']['in_dim'] = self.dataset.n_feats
         self.args['net_params']['n_classes'] = self.dataset.num_classes
+
+    def _build_preprocessor(self):
+        if 'preprocessor' in self.args.keys():
+            self.preprocessor = PreprocessorFactory.create_preprocessor(self.args['preprocessor']['name'], self.args['preprocessor'])
+            self.preprocessor.preprocess(self.dataset)
+        else:
+            self.preprocessor = None
 
     def _build_model(self):
         self.model = ModelFactory.create_model(self.args['model'], self.args['net_params']).to(self.device)

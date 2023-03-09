@@ -3,13 +3,20 @@ model: "GCN"
 dataset: 
   name: "Cora"
   self_loop: True # when self_loop is True, the graph will be forced to remove redundant edges
-test_rounds: 5
+test_rounds: 10
 save_path: "logs"
 log_interval: 50
 
+#preprocessing parameters
+preprocessor:
+  name: "DegreeBaseRewiring"
+  self_loop: False
+
+reproducibility: True
+seed: 42
+
 # learning parameters
 params:
-  seed: 41
   epochs: 500
   init_lr: 1.e-2
   lr_reduce_factor: 0.9
@@ -21,7 +28,7 @@ params:
 
 # model parameters
 net_params:
-  num_layers: 3
+  num_layers: 5
   hidden_dim: 200
   out_dim: 7
   dropout: 0.35
